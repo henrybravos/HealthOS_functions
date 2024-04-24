@@ -1,9 +1,9 @@
-import SMTPTransport = require("nodemailer/lib/smtp-transport")
+import SMTPTransport = require("nodemailer/lib/smtp-transport");
 import {generateHTMLRacs} from "../format/email-racs";
 import {getExtension, getTransport} from "../helpers";
 import {Racs} from "../types";
 const transport = getTransport();
-type ReturnSendEmail = Promise<SMTPTransport.SentMessageInfo>
+type ReturnSendEmail = Promise<SMTPTransport.SentMessageInfo>;
 /**
  * Sends an email with RACS data to the specified email addresses.
  * @param {string[]} emails - An array of email addresses to send the email to.
@@ -11,7 +11,7 @@ type ReturnSendEmail = Promise<SMTPTransport.SentMessageInfo>
  * @return {ReturnSendEmail} A promise that resolves when the email is sent.
  */
 const sendEmailRacs = async (emails: string[], data: Racs): ReturnSendEmail => {
-  const attachments: { path: string; filename: string }[] = [];
+  const attachments: {path: string; filename: string}[] = [];
   const getAttachment = (path: string, filename: string) => {
     return {path, filename};
   };
