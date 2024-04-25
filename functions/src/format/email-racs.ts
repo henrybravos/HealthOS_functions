@@ -1,4 +1,4 @@
-import {convertDate} from "../helpers/date";
+import {convertDateYYYYMMddHHmmss} from "../helpers/date";
 import {Racs} from "../types";
 /**
  * Generates an HTML string for the RACS report.
@@ -7,8 +7,8 @@ import {Racs} from "../types";
  */
 export function generateHTMLRacs(data: Racs): string {
   const dateClose = data.closeAt?.toDate();
-  const dateTimeClose = dateClose ? convertDate(dateClose) : "PENDIENTE";
-  const dateTimeOpen = convertDate(data.openAt.toDate());
+  const dateTimeClose = dateClose ? convertDateYYYYMMddHHmmss(dateClose) : "PENDIENTE";
+  const dateTimeOpen = convertDateYYYYMMddHHmmss(data.openAt.toDate());
   const html = `
       <html>
           <head>

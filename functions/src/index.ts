@@ -1,42 +1,56 @@
 import {initializeApp, getApp} from "firebase-admin/app";
 import {getAuth} from "firebase-admin/auth";
+import {firestore as firestoreDb} from "firebase-admin";
 import {firestore} from "firebase-functions";
 import {Racs, UserInfo} from "./types/index";
 import {sendEmailRacs} from "./racs/send-email";
-
-const emails = ["hbravos.info@gmail.com", "wgallardo@cip.org.pe"];
+import {createUserAuthAndProfile} from "./users/create-auth";
+import {createOrPushRacsUserReport, removeRacsUserReport} from "./users/racs-user-report";
+import {EMAILS_TO_SEND, COLLECTIONS} from "./const";
 
 initializeApp();
-const docRacsReference = firestore.document("racs/{documentId}");
-const docUserReference = firestore.document("users_info/{documentId}");
-exports.sendUpdateRacs = docRacsReference.onUpdate(async (snap) => {
-  const data = snap.after.data() as Racs;
-  await sendEmailRacs(emails, data);
+const db = firestoreDb();
+const docRacsReference = firestore.document(`${COLLECTIONS.racs}/{documentId}`);
+const docUserReference = firestore.document(`${COLLECTIONS.usersInfo}/{documentId}`);
+exports.createRacs = docRacsReference.onCreate(async (snap) => {
+  const racs = snap.data() as Racs;
+  racs.id = snap.id;
+  await sendEmailRacs(EMAILS_TO_SEND, racs);
+  await createOrPushRacsUserReport(db, racs);
   return null;
 });
-exports.sendCreateRacs = docRacsReference.onCreate(async (snap) => {
-  const data = snap.data() as Racs;
-  await sendEmailRacs(emails, data);
+exports.updateRacs = docRacsReference.onUpdate(async (snap) => {
+  const afterRacs = snap.after.data() as Racs;
+  const beforeRacs = snap.before.data() as Racs;
+  afterRacs.id = snap.after.id;
+  beforeRacs.id = snap.before.id;
+  if (!afterRacs.deletedAt) {
+    await sendEmailRacs(EMAILS_TO_SEND, afterRacs);
+  }
+  if (!beforeRacs.deletedAt && afterRacs.deletedAt) {
+    await removeRacsUserReport(db, afterRacs);
+  }
+  if (beforeRacs.deletedAt && !afterRacs.deletedAt) {
+    await createOrPushRacsUserReport(db, afterRacs);
+  }
+  return null;
+});
+exports.deleteRacs = docRacsReference.onDelete(async (snap) => {
+  const racs = snap.data() as Racs;
+  racs.id = snap.id;
+  await removeRacsUserReport(db, racs);
   return null;
 });
 exports.createUser = docUserReference.onCreate(async (snap) => {
   const user = snap.data() as UserInfo;
-  const auth = getAuth(getApp());
+  user.id = snap.id;
   try {
-    const userAuth = await auth.createUser({
-      email: user.email,
-      emailVerified: true,
-      password: user.password ?? user.dni,
-      displayName: `${user.name} ${user.surname}`,
-      disabled: user.deletedAt ? true : false,
-    });
-    await auth.setCustomUserClaims(userAuth.uid, {...user});
+    const userAuth = await createUserAuthAndProfile(user);
     await snap.ref.set({authId: userAuth.uid, password: "****"}, {merge: true});
   } catch (error) {
     console.error("Error creating new user auth:", error);
     await snap.ref.delete();
   }
-
   return null;
 });
 exports.updateUser = docUserReference.onUpdate(async (snap) => {
