@@ -20,7 +20,8 @@ const createOrPushRacsUserReport = async (db: Firestore, racs: Racs) => {
     }
     return await racsUserDoc.ref.set(updateRacsUser, {merge: true});
   } else {
-    const userDoc = await db.collection(COLLECTIONS.usersInfo).doc(racs.user.id).get();
+    const collectionUserInfo = db.collection(COLLECTIONS.usersInfo);
+    const userDoc = await collectionUserInfo.doc(racs.user.id).get();
     const user = userDoc.data() as UserInfo;
     const newRacsUser: RacsUser = {
       month: YYmm,

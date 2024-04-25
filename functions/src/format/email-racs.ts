@@ -7,7 +7,7 @@ import {Racs} from "../types";
  */
 export function generateHTMLRacs(data: Racs): string {
   const dateClose = data.closeAt?.toDate();
-  const dateTimeClose = dateClose ? convertDateYYYYMMddHHmmss(dateClose) : "PENDIENTE";
+  const dateTimeClose = dateClose ? convertDateYYYYMMddHHmmss(dateClose) : "--";
   const dateTimeOpen = convertDateYYYYMMddHHmmss(data.openAt.toDate());
   const html = `
       <html>

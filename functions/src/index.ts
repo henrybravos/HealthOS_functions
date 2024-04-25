@@ -5,21 +5,21 @@ import {firestore} from "firebase-functions";
 import {Racs, UserInfo} from "./types/index";
 import {sendEmailRacs} from "./racs/send-email";
 import {createUserAuthAndProfile} from "./users/create-auth";
-import {createOrPushRacsUserReport, removeRacsUserReport} from "./users/racs-user-report";
+import {createOrPushRacsUserReport, removeRacsUserReport} from "./users";
 import {EMAILS_TO_SEND, COLLECTIONS} from "./const";
 
 initializeApp();
 const db = firestoreDb();
-const docRacsReference = firestore.document(`${COLLECTIONS.racs}/{documentId}`);
-const docUserReference = firestore.document(`${COLLECTIONS.usersInfo}/{documentId}`);
-exports.createRacs = docRacsReference.onCreate(async (snap) => {
+const docRacsRef = firestore.document(`${COLLECTIONS.racs}/{documentId}`);
+const docUserRef = firestore.document(`${COLLECTIONS.usersInfo}/{documentId}`);
+exports.createRacs = docRacsRef.onCreate(async (snap) => {
   const racs = snap.data() as Racs;
   racs.id = snap.id;
   await sendEmailRacs(EMAILS_TO_SEND, racs);
   await createOrPushRacsUserReport(db, racs);
   return null;
 });
-exports.updateRacs = docRacsReference.onUpdate(async (snap) => {
+exports.updateRacs = docRacsRef.onUpdate(async (snap) => {
   const afterRacs = snap.after.data() as Racs;
   const beforeRacs = snap.before.data() as Racs;
   afterRacs.id = snap.after.id;
@@ -35,13 +35,13 @@ exports.updateRacs = docRacsReference.onUpdate(async (snap) => {
   }
   return null;
 });
-exports.deleteRacs = docRacsReference.onDelete(async (snap) => {
+exports.deleteRacs = docRacsRef.onDelete(async (snap) => {
   const racs = snap.data() as Racs;
   racs.id = snap.id;
   await removeRacsUserReport(db, racs);
   return null;
 });
-exports.createUser = docUserReference.onCreate(async (snap) => {
+exports.createUser = docUserRef.onCreate(async (snap) => {
   const user = snap.data() as UserInfo;
   user.id = snap.id;
   try {
@@ -53,7 +53,7 @@ exports.createUser = docUserReference.onCreate(async (snap) => {
   }
   return null;
 });
-exports.updateUser = docUserReference.onUpdate(async (snap) => {
+exports.updateUser = docUserRef.onUpdate(async (snap) => {
   const userBefore = snap.before.data() as UserInfo;
   const userAfter = snap.after.data() as UserInfo;
   if (!userBefore.deletedAt && userAfter.deletedAt) {

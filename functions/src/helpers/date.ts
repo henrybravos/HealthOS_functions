@@ -3,8 +3,10 @@ const optionsConvert = {
   zone: "America/Lima",
 };
 export const convertDateYYYYMMddHHmmss = (date: Date) => {
-  return DateTime.fromJSDate(date, optionsConvert).toFormat("yyyy-MM-dd HH:mm:ss");
+  const dateTime = DateTime.fromJSDate(date, optionsConvert);
+  return dateTime.toFormat("yyyy-MM-dd HH:mm:ss");
 };
 export const convertDateYYYYMM = (date: Date) => {
-  return DateTime.fromJSDate(date, optionsConvert).toFormat("yyyy-MM");
+  const dateTime = DateTime.fromJSDate(date, optionsConvert);
+  return dateTime.toFormat("yyyy-MM");
 };
