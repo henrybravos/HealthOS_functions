@@ -6,7 +6,7 @@ import {Racs, UserInfo} from "./types/index";
 import {sendEmailRacs} from "./racs/send-email";
 import {createUserAuthAndProfile} from "./users/create-auth";
 import {createOrPushRacsUserReport, removeRacsUserReport} from "./users";
-import {EMAILS_TO_SEND, COLLECTIONS} from "./const";
+import {COLLECTIONS} from "./const";
 
 initializeApp();
 const db = firestoreDb();
@@ -15,7 +15,7 @@ const docUserRef = firestore.document(`${COLLECTIONS.usersInfo}/{documentId}`);
 exports.createRacs = docRacsRef.onCreate(async (snap) => {
   const racs = snap.data() as Racs;
   racs.id = snap.id;
-  await sendEmailRacs(EMAILS_TO_SEND, racs);
+  await sendEmailRacs(db, racs);
   await createOrPushRacsUserReport(db, racs);
   return null;
 });
@@ -25,7 +25,7 @@ exports.updateRacs = docRacsRef.onUpdate(async (snap) => {
   afterRacs.id = snap.after.id;
   beforeRacs.id = snap.before.id;
   if (!afterRacs.deletedAt) {
-    await sendEmailRacs(EMAILS_TO_SEND, afterRacs);
+    await sendEmailRacs(db, afterRacs);
   }
   if (!beforeRacs.deletedAt && afterRacs.deletedAt) {
     await removeRacsUserReport(db, afterRacs);

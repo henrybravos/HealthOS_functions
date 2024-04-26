@@ -8,4 +8,5 @@ export const COLLECTIONS = {
   racs: "racs",
   unsafeConditions: "unsafe_conditions",
   reports: "reports",
+  config: "config",
 };
