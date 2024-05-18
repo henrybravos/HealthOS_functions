@@ -40,6 +40,9 @@ export type Racs = {
   classification: ClassificationEvent;
   controlCondition: string;
   status: StatusRacs;
+  otherPlace?: string;
+  otherCompany?: string;
+  otherEventType?: string;
 };
 export type RacsUser = {
   month: string;

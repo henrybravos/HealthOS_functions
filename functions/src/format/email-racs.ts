@@ -9,6 +9,14 @@ export function generateHTMLRacs(data: Racs): string {
   const dateClose = data.closeAt?.toDate();
   const dateTimeClose = dateClose ? convertDateYYYYMMddHHmmss(dateClose) : "--";
   const dateTimeOpen = convertDateYYYYMMddHHmmss(data.openAt.toDate());
+  const isOtherCompany = data.company.id === "OTHER";
+  const otherCompany = `OTRO/${data.otherCompany}`;
+  const otherPlace = `OTRO/${data.otherPlace}`;
+  const otherEventType = `OTRO/${data.otherEventType}`;
+  const company = isOtherCompany ? otherCompany : data.company.name;
+  const place = data.place.id === "OTHER" ? otherPlace : data.place.name;
+  const isOtherEType = data.eventType.id === "OTHER";
+  const eventType = isOtherEType ? otherEventType : data.eventType.name;
   const html = `
       <html>
           <head>
@@ -49,8 +57,8 @@ export function generateHTMLRacs(data: Racs): string {
                       <th>Fecha de cierre</th>
                   </tr>
                   <tr>
-                      <td>${data.place.name}</td>
-                      <td>${data.description}</td>
+                  <td>${place?.toUpperCase()}</td>
+                  <td>${data.description}</td>
                       <td>${dateTimeOpen}</td>
                       <td>${dateTimeClose}</td>
                   </tr>
@@ -61,9 +69,9 @@ export function generateHTMLRacs(data: Racs): string {
                       <th>Clasificación</th>
                   </tr>
                   <tr>
-                      <td>${data.company.name}</td>
+                      <td>${company?.toUpperCase()}</td>
                       <td>${data.type}</td>
-                      <td>${data.eventType.name}</td>
+                      <td>${eventType?.toUpperCase()}</td>
                       <td>${data.classification}</td>
                   </tr>
                   <tr>
